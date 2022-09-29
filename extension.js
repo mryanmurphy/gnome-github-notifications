@@ -152,9 +152,12 @@ class GithubNotifications {
     }
 
     initHttp() {
-        let url = 'https://api.' + this.domain + '/notifications';
+        // github rest api -> api.github.com
+        // github enterprise rest api -> [hostname]/api/v3
+        const gh = this.domain === 'github.com' ? 'api.github.com' : this.domain + '/api/v3';
+        let url = 'https://' + gh + '/notifications';
         if (this.showParticipatingOnly) {
-            url = 'https://api.' + this.domain + '/notifications?participating=1';
+            url = 'https://' + gh + '/notifications?participating=1';
         }
         this.authUri = new Soup.URI(url);
         this.authUri.set_user(this.handle);
@@ -167,7 +170,7 @@ class GithubNotifications {
             this.httpSession.user_agent = 'gnome-shell-extension github notification via libsoup';
 
             this.authManager = new Soup.AuthManager();
-            this.auth = new Soup.AuthBasic({ host: 'api.' + this.domain, realm: 'Github Api' });
+            this.auth = new Soup.AuthBasic({ host: gh.split('/')[0], realm: 'Github Api' });
 
             this.authManager.use_auth(this.authUri, this.auth);
             Soup.Session.prototype.add_feature.call(this.httpSession, this.authManager);
